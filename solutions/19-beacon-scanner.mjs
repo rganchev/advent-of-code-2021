@@ -31,10 +31,6 @@ function generateRotations() {
   return allRotations
 }
 
-function hash(beacon) {
-  return (beacon[0] << 20) + (beacon[1] << 10) + beacon[2]
-}
-
 function rotate(x, r) {
   return [
     r[0][0] * x[0] + r[0][1] * x[1] + r[0][2] * x[2],
@@ -64,28 +60,24 @@ export async function solve() {
   }]
   const unidentifiedScanners = new Set(rotatedScanners.slice(1))
   for (const { beacons: beaconsA } of identifiedScanners) {
-    const beaconSetA = new Set(beaconsA.map(hash))
     for (const scannerB of unidentifiedScanners) {
       for (const rotatedBeaconsB of scannerB) {
-        const isIdentified = beaconsA.slice(11).some(beaconA => rotatedBeaconsB.slice(11).some(beaconB => {
-          const translation = beaconA.map((a, i) => a - beaconB[i])
-          const translatedBeaconsB = rotatedBeaconsB.map(beacon => translate(beacon, translation))
-          const nOverlapping = translatedBeaconsB.filter(x => beaconSetA.has(hash(x))).length
-          if (nOverlapping >= 12) {
-            unidentifiedScanners.delete(scannerB)
-            identifiedScanners.push({
-              beacons: translatedBeaconsB,
-              origin: translation,
-            })
-            return true
-          }
-        }))
-        if (isIdentified) { break }
+        const allPointDiffs = beaconsA.flatMap(a => rotatedBeaconsB.map(b => a.map((x, i) => x - b[i]).join(':')))
+        const [translationStr, count] = _.chain(allPointDiffs).countBy(x => x).toPairs().maxBy(x => x[1]).value()
+        if (count >= 12) {
+          const translation = translationStr.split(':').map(Number)
+          unidentifiedScanners.delete(scannerB)
+          identifiedScanners.push({
+            beacons: rotatedBeaconsB.map(b => translate(b, translation)),
+            origin: translation,
+          })
+          break
+        }
       }
     }
   }
 
-  const allBeacons = new Set(identifiedScanners.flatMap(s => s.beacons.map(hash)))
+  const allBeacons = new Set(identifiedScanners.flatMap(s => s.beacons.map(b => b.join(':'))))
   console.log('Answer, part 1:', allBeacons.size)
 
   const originPairs = identifiedScanners.slice(0, -1).flatMap((s, i) => identifiedScanners.slice(i + 1).map(t => [s.origin, t.origin]))
