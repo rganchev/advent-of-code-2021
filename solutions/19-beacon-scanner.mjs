@@ -1,9 +1,5 @@
 import { fetchInputForDay } from '../input.mjs'
 
-function matMul(a, b) {
-  return a.map(aRow => b[0].map((_, j) => aRow.reduce((sum, aElem, i) => sum + aElem * b[i][j], 0)))
-}
-
 function rotation(axis, angle) {
   const index = ['x', 'y', 'z'].indexOf(axis)
   const matrix = [
@@ -18,41 +14,20 @@ function rotation(axis, angle) {
   return matrix
 }
 
-function cmp(a, b) {
-  for (const i in a) {
-    for (const j in a[i]) {
-      if (Math.abs(a[i][j] - b[i][j]) > 1e-6) { return false }
-    }
-  }
-  return true
-}
-
 function generateRotations() {
   const angles = [0, Math.PI / 2, Math.PI, 3 * Math.PI / 2]
   const rotations = ['x', 'y', 'z'].map(axis => angles.map(angle => rotation(axis, angle)))
   const allRotations = []
-  for (const xRotation of rotations[0]) {
-    for (const yRotation of rotations[1]) {
-      for (const zRotation of rotations[2]) {
-        const rotation = matMul(matMul(xRotation, yRotation), zRotation)
-        if (!allRotations.find(r => cmp(r, rotation))) {
-          allRotations.push(rotation)
-        }
-      }
+  const matMul = (a, b) => a.map(aRow => b[0].map((_, j) => aRow.reduce((sum, aElem, i) => sum + aElem * b[i][j], 0)))
+  const cmp = (a, b) => !a.find((row, i) => row.find((elem, j) => Math.abs(elem - b[i][j]) > 1e-6))
+  rotations[0].forEach(xRotation => rotations[1].forEach(yRotation => rotations[2].forEach(zRotation => {
+    const rotation = matMul(matMul(xRotation, yRotation), zRotation)
+    if (!allRotations.find(r => cmp(r, rotation))) {
+      allRotations.push(rotation)
     }
-  }
+  })))
 
   return allRotations
-}
-
-function somePair(a, b, check) {
-  for (const xa of a) {
-    for (const xb of b) {
-      if (check(xa, xb)) { return true }
-    }
-  }
-
-  return false
 }
 
 function hash(beacon) {
@@ -77,36 +52,38 @@ export async function solve() {
     .map(s => s.sort((a, b) => a[0] - b[0]))
 
   const rotations = generateRotations().map(r => r.map(row => row.map(x => Math.round(x))))
+  const rotatedScanners = scanners.map(scanner =>
+    rotations.map(rotation =>
+      scanner.map(beacon => rotate(beacon, rotation)).sort((x, y) => x[0] - y[0])
+    )
+  )
   const identifiedScanners = [{
-    beacons: scanners[0],
+    beacons: rotatedScanners[0][0],
     referenceIndex: -1,
-    rotation: rotations[0],
     translation: [0, 0, 0],
   }]
   let index = -1
-  const unidentifiedScanners = new Set(scanners.slice(1))
+  const unidentifiedScanners = new Set(rotatedScanners.slice(1))
   while (unidentifiedScanners.size > 0) {
     index += 1
     const scannerA = identifiedScanners[index].beacons
     const beaconSetA = new Set(scannerA.map(hash))
     ;[...unidentifiedScanners].forEach(scannerB => {
-      for (const rotation of rotations) {
-        const rotatedBeaconsB = scannerB.map(b => rotate(b, rotation))
-        const isIdentified = somePair(scannerA, rotatedBeaconsB, (beaconA, beaconB) => {
+      for (const rotatedBeaconsB of scannerB) {
+        const isIdentified = scannerA.slice(11).some(beaconA => rotatedBeaconsB.slice(11).some(beaconB => {
           const translation = beaconA.map((a, i) => a - beaconB[i])
           const transformedBeaconB = rotatedBeaconsB.map(beacon => translate(beacon, translation))
-          const totalSet = new Set([...beaconSetA, ...transformedBeaconB.map(hash)])
-          if (scannerA.length + scannerB.length - totalSet.size >= 12) {
+          const nOverlapping = transformedBeaconB.filter(x => beaconSetA.has(hash(x))).length
+          if (nOverlapping >= 12) {
             unidentifiedScanners.delete(scannerB)
             identifiedScanners.push({
-              beacons: scannerB,
+              beacons: rotatedBeaconsB,
               referenceIndex: index,
-              rotation,
               translation,
             })
             return true
           }
-        })
+        }))
         if (isIdentified) { break }
       }
     })
@@ -117,7 +94,7 @@ export async function solve() {
     let beacons = scanner.beacons
     let current = scanner
     while (current) {
-      beacons = beacons.map(b => translate(rotate(b, current.rotation), current.translation))
+      beacons = beacons.map(b => translate(b, current.translation))
       current = identifiedScanners[current.referenceIndex]
     }
     beacons.map(hash).forEach(b => allBeacons.add(b))
@@ -128,7 +105,7 @@ export async function solve() {
     let origin = [0, 0, 0]
     let current = scanner
     while (current) {
-      origin = translate(rotate(origin, current.rotation), current.translation)
+      origin = translate(origin, current.translation)
       current = identifiedScanners[current.referenceIndex]
     }
     return origin
