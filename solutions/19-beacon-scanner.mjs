@@ -1,4 +1,5 @@
 import { fetchInputForDay } from '../input.mjs'
+import _ from 'lodash'
 
 function rotation(axis, angle) {
   const index = ['x', 'y', 'z'].indexOf(axis)
@@ -59,65 +60,35 @@ export async function solve() {
   )
   const identifiedScanners = [{
     beacons: rotatedScanners[0][0],
-    referenceIndex: -1,
-    translation: [0, 0, 0],
+    origin: [0, 0, 0],
   }]
-  let index = -1
   const unidentifiedScanners = new Set(rotatedScanners.slice(1))
-  while (unidentifiedScanners.size > 0) {
-    index += 1
-    const scannerA = identifiedScanners[index].beacons
-    const beaconSetA = new Set(scannerA.map(hash))
-    ;[...unidentifiedScanners].forEach(scannerB => {
+  for (const { beacons: beaconsA } of identifiedScanners) {
+    const beaconSetA = new Set(beaconsA.map(hash))
+    for (const scannerB of unidentifiedScanners) {
       for (const rotatedBeaconsB of scannerB) {
-        const isIdentified = scannerA.slice(11).some(beaconA => rotatedBeaconsB.slice(11).some(beaconB => {
+        const isIdentified = beaconsA.slice(11).some(beaconA => rotatedBeaconsB.slice(11).some(beaconB => {
           const translation = beaconA.map((a, i) => a - beaconB[i])
-          const transformedBeaconB = rotatedBeaconsB.map(beacon => translate(beacon, translation))
-          const nOverlapping = transformedBeaconB.filter(x => beaconSetA.has(hash(x))).length
+          const translatedBeaconsB = rotatedBeaconsB.map(beacon => translate(beacon, translation))
+          const nOverlapping = translatedBeaconsB.filter(x => beaconSetA.has(hash(x))).length
           if (nOverlapping >= 12) {
             unidentifiedScanners.delete(scannerB)
             identifiedScanners.push({
-              beacons: rotatedBeaconsB,
-              referenceIndex: index,
-              translation,
+              beacons: translatedBeaconsB,
+              origin: translation,
             })
             return true
           }
         }))
         if (isIdentified) { break }
       }
-    })
+    }
   }
 
-  const allBeacons = new Set()
-  for (const scanner of identifiedScanners) {
-    let beacons = scanner.beacons
-    let current = scanner
-    while (current) {
-      beacons = beacons.map(b => translate(b, current.translation))
-      current = identifiedScanners[current.referenceIndex]
-    }
-    beacons.map(hash).forEach(b => allBeacons.add(b))
-  }
+  const allBeacons = new Set(identifiedScanners.flatMap(s => s.beacons.map(hash)))
   console.log('Answer, part 1:', allBeacons.size)
 
-  const scannerPositions = identifiedScanners.map(scanner => {
-    let origin = [0, 0, 0]
-    let current = scanner
-    while (current) {
-      origin = translate(origin, current.translation)
-      current = identifiedScanners[current.referenceIndex]
-    }
-    return origin
-  })
-  let maxDistance = -Infinity
-  for (let i = 0; i < scannerPositions.length - 1; i++) {
-    const a = scannerPositions[i]
-    for (let j = i + 1; j < scannerPositions.length; j++) {
-      const b = scannerPositions[j]
-      const distance = Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2])
-      maxDistance = Math.max(distance, maxDistance)
-    }
-  }
+  const originPairs = identifiedScanners.slice(0, -1).flatMap((s, i) => identifiedScanners.slice(i + 1).map(t => [s.origin, t.origin]))
+  const maxDistance = _.max(originPairs.map(([a, b]) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2])))
   console.log('Answer, part 2:', maxDistance)
 }
