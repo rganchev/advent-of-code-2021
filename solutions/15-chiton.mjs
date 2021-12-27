@@ -1,7 +1,7 @@
 import { fetchInputForDay } from '../input.mjs'
 import _ from 'lodash'
 
-class Heap {
+export class Heap {
   constructor(elements) {
     this.elements = new Array()
     this.indexMap = new Map()
