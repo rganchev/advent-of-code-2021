@@ -1,22 +1,22 @@
-import { fetchInputForDay } from '../input.mjs'
+import { fetchInputForDay } from '../../input.mjs'
 import _ from 'lodash'
 
 export async function solve() {
   const input = (await fetchInputForDay(21)).trim().split('\n').map(line => Number(line.match(/\d+$/)[0]) - 1)
-  
+
   function playDeterministicGame() {
     const positions = [...input]
     const scores = [0, 0]
 
     let numberOfRolls = 0
     let turn = 0
-  
+
     function rollDeterministicDice(n) {
       const result = _.sum(_.times(n, i => 1 + (numberOfRolls + i) % 100))
       numberOfRolls += n
       return result
     }
-  
+
     while (scores.every(score => score < 1000)) {
       positions[turn] = (positions[turn] + rollDeterministicDice(3)) % 10
       scores[turn] += positions[turn] + 1

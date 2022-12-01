@@ -1,4 +1,4 @@
-import { fetchInputForDay } from '../input.mjs'
+import { fetchInputForDay } from '../../input.mjs'
 
 class SnailfishNumber {
   constructor() {
@@ -82,7 +82,7 @@ class Num extends SnailfishNumber {
 export async function solve() {
   const parse = x => typeof x === 'number' ? new Num(x) : new Pair(...x.map(parse))
   const input = (await fetchInputForDay(18)).trim().split('\n').map(x => parse(JSON.parse(x)))
-  
+
   const sum = input.slice(1).reduce((s, x) => s.add(x), input[0])
   console.log('Answer, part 1:', sum.magnitude())
 

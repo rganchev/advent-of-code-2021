@@ -1,4 +1,4 @@
-import { fetchInputForDay } from '../input.mjs'
+import { fetchInputForDay } from '../../input.mjs'
 import _ from 'lodash'
 
 const bracketMap = {
@@ -24,7 +24,7 @@ const completionScores = {
 
 export async function solve() {
   const input = _.compact((await fetchInputForDay(10)).split('\n'))
-  
+
   function findError(line) {
     const q = []
     for (const c of line) {

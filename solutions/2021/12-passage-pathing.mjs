@@ -1,4 +1,4 @@
-import { fetchInputForDay } from '../input.mjs'
+import { fetchInputForDay } from '../../input.mjs'
 import _ from 'lodash'
 
 export async function solve() {
@@ -15,7 +15,7 @@ export async function solve() {
     const smallCaves = path.filter(x => /^[a-z]+$/.test(x))
     return new Set(smallCaves).size < smallCaves.length
   }
-  
+
   function findPaths(path, canInclude) {
     const last = path[path.length - 1]
     if (last === 'end') return 1

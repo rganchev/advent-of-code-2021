@@ -1,4 +1,4 @@
-import { fetchInputForDay } from '../input.mjs'
+import { fetchInputForDay } from '../../input.mjs'
 import _ from 'lodash'
 
 class Point {
@@ -31,7 +31,7 @@ export async function solve() {
         point[coord] = 2 * instruction[coord] - point[coord]
         points.add(String(point))
       })
-    
+
     if (i === 0) console.log('Answer, part 1:', points.size)
   })
 

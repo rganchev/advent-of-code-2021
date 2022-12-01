@@ -1,4 +1,4 @@
-import { fetchInputForDay } from '../input.mjs'
+import { fetchInputForDay } from '../../input.mjs'
 import _ from 'lodash'
 
 export async function solve() {
@@ -70,7 +70,7 @@ export async function solve() {
     while (true) {
       let index = commands.findIndex(x => !x.isOn)
       if (index < 0) break
-  
+
       while (index > 0) {
         const diff = difference(commands[index - 1].cuboid, [commands[index].cuboid]).map(cuboid => ({ isOn: true, cuboid }))
         commands.splice(index - 1, 2, commands[index], ...diff)
@@ -78,7 +78,7 @@ export async function solve() {
       }
       commands.shift()
     }
-  
+
     const cuboids = commands.map(x => x.cuboid)
     for (let i = 1; i < cuboids.length; i++) {
       const diff = difference(cuboids[i], cuboids.slice(0, i))
@@ -91,7 +91,7 @@ export async function solve() {
 
   const initArea = { x: { min: -50, max: 50 }, y: { min: -50, max: 50 }, z: { min: -50, max: 50 } }
   const initInput = input.filter(({ cuboid }) => !!intersection([cuboid, initArea]))
-  
+
   console.log('Answer, part 1:', executeCommands(initInput))
   console.log('Answer, part 2:', executeCommands(input))
 }

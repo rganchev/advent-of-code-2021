@@ -1,4 +1,4 @@
-import { fetchInputForDay } from '../input.mjs'
+import { fetchInputForDay } from '../../input.mjs'
 
 export async function solve() {
   const map = (await fetchInputForDay(25)).trim().split('\n').map(line => line.trim().split(''))

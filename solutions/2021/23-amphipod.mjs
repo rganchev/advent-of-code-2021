@@ -1,4 +1,4 @@
-import { fetchInputForDay } from '../input.mjs'
+import { fetchInputForDay } from '../../input.mjs'
 import _ from 'lodash'
 import { Heap } from './15-chiton.mjs'
 
@@ -41,7 +41,7 @@ export async function solve() {
       }
     }))
   }
-  
+
   function generateRoomMoves({ hallway, rooms, energy }) {
     return rooms.flatMap((room, i) => {
       if (room.every(x => x === 0 || x === targetRooms.indexOf(i))) { return [] }
@@ -106,7 +106,7 @@ export async function solve() {
         .forEach(s => {
           const id = encode(s)
           if (visited.has(id)) return
-  
+
           if (energies.has(id)) {
             energies.update({ id, weight: Math.min(energies.getWeight(id), s.energy) })
           } else {

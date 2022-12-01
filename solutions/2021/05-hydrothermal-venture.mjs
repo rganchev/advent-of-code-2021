@@ -1,4 +1,4 @@
-import { fetchInputForDay } from '../input.mjs'
+import { fetchInputForDay } from '../../input.mjs'
 import _ from 'lodash'
 
 export async function solve() {
@@ -6,7 +6,7 @@ export async function solve() {
   const maxX = _.max(lines.flatMap(([a, b]) => [a[0], b[0]]))
   const maxY = _.max(lines.flatMap(([a, b]) => [a[1], b[1]]))
   const canvas = new Array((maxX + 1) * (maxY + 1)).fill(0)
-  
+
   const p = (x, y) => y * (maxX + 1) + x
 
   function drawLine(a, b) {

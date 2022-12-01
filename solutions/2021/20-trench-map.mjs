@@ -1,4 +1,4 @@
-import { fetchInputForDay } from '../input.mjs'
+import { fetchInputForDay } from '../../input.mjs'
 import _ from 'lodash'
 
 export async function solve() {
@@ -15,7 +15,7 @@ export async function solve() {
       ..._.times(n, () => [...zeroRow]),
     ]
   }
-  
+
   function getClamped(bitmap, i, j) {
     return bitmap[Math.min(Math.max(0, i), bitmap.length - 1)][Math.min(Math.max(0, j), bitmap[0].length - 1)]
   }

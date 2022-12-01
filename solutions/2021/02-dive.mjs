@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { fetchInputForDay } from '../input.mjs'
+import { fetchInputForDay } from '../../input.mjs'
 
 export async function solve() {
   const input = _.compact((await fetchInputForDay(2)).split('\n'))

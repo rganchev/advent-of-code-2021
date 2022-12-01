@@ -1,4 +1,4 @@
-import { fetchInputForDay } from '../input.mjs'
+import { fetchInputForDay } from '../../input.mjs'
 import _ from 'lodash'
 
 export class Heap {
@@ -79,7 +79,7 @@ export async function solve() {
     const graph = input.flatMap(line => line)
     const size = input.length
     const distances = new Heap(graph.map((_, i) => ({ id: i, weight: Infinity })))
-  
+
     function adj(x) {
       const adjacent = []
       if (x >= size) adjacent.push(x - size)
@@ -88,7 +88,7 @@ export async function solve() {
       if (x % size < size - 1) adjacent.push(x + 1)
       return adjacent
     }
-  
+
     distances.update({ id: 0, weight: 0 })
     let current
     do {
@@ -102,7 +102,7 @@ export async function solve() {
   }
 
   console.log('Answer, part 1:', dijkstra(input))
-  
+
   const tiledInput = _.times(5, i => input.map(line => _.times(5, j => line.map(x => (x - 1 + i + j) % 9 + 1)).flatMap(line => line))).flatMap(tile => tile)
   console.log('Answer, part 2:', dijkstra(tiledInput))
 }

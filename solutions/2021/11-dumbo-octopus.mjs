@@ -1,4 +1,4 @@
-import { fetchInputForDay } from '../input.mjs'
+import { fetchInputForDay } from '../../input.mjs'
 import _ from 'lodash'
 
 export async function solve() {
@@ -31,7 +31,7 @@ export async function solve() {
         }
       }
     })
-    
+
     sumFlashes += nFlashes
     if (step === 99) {
       console.log('Answer, part 1:', sumFlashes)
