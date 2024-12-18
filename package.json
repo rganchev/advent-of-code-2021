@@ -4,7 +4,8 @@
   "description": "Solutions to puzzles from the 2021 Advent Of Code",
   "main": "index.mjs",
   "scripts": {
-    "start": "node index.mjs"
+    "start": "node index.mjs",
+    "init-solution": "node init-solution.mjs"
   },
   "author": "Radan Ganchev",
   "license": "ISC",

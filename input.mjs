@@ -1,15 +1,24 @@
 import fetch from "node-fetch";
+import { existsSync } from "fs";
+import { readFile, writeFile, mkdir } from "fs/promises";
 
 export async function fetchInputForDay(day, year = 2021) {
-  const input = await fetch(
-    `https://adventofcode.com/${year}/day/${day}/input`,
-    {
-      headers: {
-        Cookie:
-          "session=53616c7465645f5f124c2ad20e0a789bd4a1c1b1b8be136dcfc3bb134872763fc6cf3115e73ccadfdc775ded1834d0f8525fa09bc7c0e5d8297e737de64543b1",
-      },
-    }
-  );
+  const dir = `inputs/${year}`;
+  const path = `${dir}/${day}.txt`;
+  if (existsSync(path)) {
+    return readFile(path, "utf-8");
+  }
 
-  return input.text();
+  const input = await fetch(`https://adventofcode.com/${year}/day/${day}/input`, {
+    headers: {
+      Cookie:
+        "session=53616c7465645f5f3e8e325df163c2b3852859a59e62143b3fea2f7e741de72dd5f9d0b87502e5896e9f084272daf5522e7c43c00a80a92671a928546552de8f",
+    },
+  });
+  const content = await input.text();
+
+  if (!existsSync(dir)) await mkdir(dir, { recursive: true });
+  await writeFile(path, content, "utf-8");
+
+  return content;
 }
